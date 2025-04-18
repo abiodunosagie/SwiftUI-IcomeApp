@@ -13,13 +13,17 @@ struct HomeView: View {
         Transaction(title: "Apple", type: .expense, amount: 5.00, date: Date()),
         Transaction(title: "Banana", type: .expense, amount: 2.00, date: Date())
     ]
+    @State private var showAddTransactionView: Bool = false
+    @State private var transactionToEdit: Transaction?
+    
+    
     // MARK: - FUNCTIONS
     
     fileprivate func FloatingButton() -> some View {
         VStack {
             Spacer()
             NavigationLink {
-                AddTransactionView()
+                AddTransactionView(transactions: $transactions)
             } label: {
                 Text("+")
                     .font(.largeTitle)
@@ -83,18 +87,45 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                VStack {
                     VStack {
                         BalanceView()
                         List {
                             ForEach(transactions) { transaction in
-                                TransactionView(transaction: transaction)
+                                Button(action: {
+                                    transactionToEdit = transaction
+                                }, label: {
+                                    
+                                    TransactionView(transaction: transaction)
+                                        .foregroundStyle(.black)
+                                })
                             }
                         }
+                        .scrollContentBackground(.hidden)
                     }//: VSTACK
-                }
+                   
+                
                 
                 FloatingButton()
+            }
+            .navigationTitle("Income")
+            .navigationDestination(item: $transactionToEdit, destination: { transactionToEdit in
+                AddTransactionView(transactions: $transactions,
+                                   transactionToEdit: transactionToEdit
+                )
+            })
+            .navigationDestination(isPresented: $showAddTransactionView, destination: {
+                AddTransactionView(transactions: $transactions)
+            })
+            .toolbar{
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        
+                    } label: {
+                        Image(systemName: "gearshape.fill")
+                            .foregroundStyle(.black)
+                    }
+
+                }
             }
         }//: ZSTACK
         
