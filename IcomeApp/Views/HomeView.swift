@@ -9,15 +9,47 @@ import SwiftUI
 
 struct HomeView: View {
     // MARK: - PROPERTIES
-    @State private var transactions: [Transaction] = [
-        Transaction(title: "Apple", type: .expense, amount: 5.00, date: Date()),
-        Transaction(title: "Banana", type: .expense, amount: 2.00, date: Date())
-    ]
+    @State private var transactions: [Transaction] = []
     @State private var showAddTransactionView: Bool = false
     @State private var transactionToEdit: Transaction?
     
     
-    // MARK: - FUNCTIONS
+    // MARK: - COMPUTED PROPERTIES
+    
+   private var expenses: String {
+        let sumExpenses = transactions.filter({ $0.type == .expense }).reduce(
+            0,
+            { $0 + $1.amount
+            })
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .currency
+        return numberFormatter.string(from: sumExpenses as NSNumber) ?? "#0.00"
+    }
+    
+    private var incomes: String {
+        let sumIncomes = transactions.filter({ $0.type == .income }).reduce(
+            0,
+            { $0 + $1.amount
+            })
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .currency
+        return numberFormatter.string(from: sumIncomes as NSNumber) ?? "#0.00"
+    }
+    
+    var total: String {
+        let sumExpenses = transactions.filter({ $0.type == .expense }).reduce(
+            0,
+            { $0 + $1.amount
+            })
+        let sumIncomes = transactions.filter({ $0.type == .income }).reduce(
+            0,
+            { $0 + $1.amount
+            })
+        let total = sumIncomes - sumExpenses
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .currency
+        return numberFormatter.string(from: total as NSNumber) ?? "#0.00"
+    }
     
     fileprivate func FloatingButton() -> some View {
         VStack {
@@ -43,13 +75,16 @@ struct HomeView: View {
                 .fill(Color.primaryLightGreen)
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    VStack {
+                    VStack(alignment: .leading) {
                         Text("BALANCE")
                             .font(.caption)
                             .foregroundStyle(.white)
-                        Text("$2")
+                        Text("\(total)")
                             .font(.system(size: 42, weight: .light))
                             .foregroundStyle(.white)
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(1)
+                            
                     }//: VSTACK
                     Spacer()
                 }//: HSTACK
@@ -60,7 +95,7 @@ struct HomeView: View {
                         Text("Expense")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(.white)
-                        Text("$22")
+                        Text("\(expenses)")
                             .font(.system(size: 15, weight: .regular))
                             .foregroundStyle(.white)
                     }//: EXPENSE VSTACK
@@ -68,7 +103,7 @@ struct HomeView: View {
                         Text("Income")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(.white)
-                        Text("$82")
+                        Text("\(incomes)")
                             .font(.system(size: 15, weight: .regular))
                             .foregroundStyle(.white)
                     } //: INCOME VSTACK
@@ -102,11 +137,9 @@ struct HomeView: View {
                         }
                         .scrollContentBackground(.hidden)
                     }//: VSTACK
-                   
-                
                 
                 FloatingButton()
-            }
+            }//: ZSTACK
             .navigationTitle("Income")
             .navigationDestination(item: $transactionToEdit, destination: { transactionToEdit in
                 AddTransactionView(transactions: $transactions,
@@ -126,8 +159,8 @@ struct HomeView: View {
                     }
 
                 }
-            }
-        }//: ZSTACK
+            }//: TOOLBAR
+        }//: NAVIGATION STACK
         
     }
 }

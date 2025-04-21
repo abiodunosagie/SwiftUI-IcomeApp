@@ -61,7 +61,15 @@ struct AddTransactionView: View {
                     amount: amount,
                     date: Date())
                 if let transactionToEdit = transactionToEdit {
-                    let index = transactions.firstIndex(of: transactionToEdit)
+                    guard let indexOfTransaction = transactions.firstIndex(
+                        of: transactionToEdit
+                    ) else {
+                        alertTitle = "Soemthing went wrong!"
+                        alertMessage = "Cannot update this transaction right now."
+                        showAlert = true
+                        return
+                    }
+                    transactions[indexOfTransaction] = transaction
                 } else {
                     
                     transactions.append(transaction)
@@ -85,7 +93,7 @@ struct AddTransactionView: View {
 
             
             Spacer()
-        }
+        }//: VSTACK
         .onAppear(perform: {
             if let transactionToEdit = transactionToEdit {
                 amount = transactionToEdit.amount
