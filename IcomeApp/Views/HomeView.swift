@@ -134,6 +134,7 @@ struct HomeView: View {
                                         .foregroundStyle(.black)
                                 })
                             }
+                            .onDelete(perform: delete)
                         }
                         .scrollContentBackground(.hidden)
                     }//: VSTACK
@@ -162,6 +163,10 @@ struct HomeView: View {
             }//: TOOLBAR
         }//: NAVIGATION STACK
         
+    }
+    
+    private func delete(at offsets: IndexSet) {
+        transactions.remove(atOffsets: offsets)
     }
 }
 // MARK: - PREVIEW
