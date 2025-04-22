@@ -10,6 +10,7 @@ import SwiftUI
 struct TransactionView: View {
     // MARK: - PROPERTIES
     let transaction: Transaction
+    @AppStorage("currency") var currency: Currency = .ngn
     // MARK: - BODY
     var body: some View {
         VStack {
@@ -32,7 +33,9 @@ struct TransactionView: View {
                         Text(transaction.title)
                             .font(.system(size: 15, weight: .bold))
                         Spacer()
-                        Text(String(transaction.displayAmount))
+                        Text(
+                            String(transaction.displayAmount(currency: currency))
+                        )
                             .font(.system(size: 15, weight: .bold))
                     }//: HSTACK
                     Text("Completed")
