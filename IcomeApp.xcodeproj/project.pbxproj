@@ -6,6 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXCopyFilesBuildPhase section */
+		627DFCFF2DBD5A1B00C55149 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		627B625B2DACE8DF00BABD85 /* IcomeApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IcomeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -55,6 +68,7 @@
 				627B62572DACE8DF00BABD85 /* Sources */,
 				627B62582DACE8DF00BABD85 /* Frameworks */,
 				627B62592DACE8DF00BABD85 /* Resources */,
+				627DFCFF2DBD5A1B00C55149 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -94,6 +108,8 @@
 			);
 			mainGroup = 627B62522DACE8DF00BABD85;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 627B625C2DACE8DF00BABD85 /* Products */;
 			projectDirPath = "";

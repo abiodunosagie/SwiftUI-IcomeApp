@@ -6,9 +6,11 @@
 //
 
 import SwiftUI
+import SwiftData
+
 
 struct AddTransactionView: View {
-   
+    
     @State private var amount = 0.00
     @State private var selectedTransactionType: TransactionType = .expense
     @State private var transactiontitle: String = ""
@@ -16,9 +18,10 @@ struct AddTransactionView: View {
     @State private var alertMessage = ""
     @State private var showAlert = false
     @Binding var transactions: [Transaction]
-    var transactionToEdit: Transaction?
+    var transactionToEdit: TransactionModel?
     @Environment(\.dismiss) var dismiss
     @AppStorage("currency") var currency: Currency = .ngn
+    @Environment(\.modelContext) private var context
     
     var numberFormatter: NumberFormatter {
         let numberFormatter = NumberFormatter()
@@ -56,7 +59,7 @@ struct AddTransactionView: View {
                     showAlert = true
                     return
                 }
-              let transaction =  Transaction(
+                let transaction =  Transaction(
                     title: transactiontitle,
                     type: selectedTransactionType,
                     amount: amount,
@@ -72,15 +75,18 @@ struct AddTransactionView: View {
                     }
                     transactions[indexOfTransaction] = transaction
                 } else {
+                    let transaction = TransactionModel(
+                        id: UUID(),
+                        title: transactiontitle,
+                        type: selectedTransactionType,
+                        amount: amount,
+                        date: Date())
+                        context.insert(transaction)
                     
-                    transactions.append(transaction)
-                    amount = 0.00
-                    transactiontitle = ""
-                    selectedTransactionType = .expense
                 }
                 dismiss()
-
-               
+                
+                
             } label: {
                 Text(transactionToEdit == nil ? "Create" : "Update")
                     .font(.system(size: 15, weight: .semibold))
@@ -91,7 +97,7 @@ struct AddTransactionView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 7))
             }
             .padding(.horizontal, 30)
-
+            
             
             Spacer()
         }//: VSTACK
@@ -109,11 +115,11 @@ struct AddTransactionView: View {
             } label: {
                 Text("Okay")
             }
-
+            
         } message: {
             Text(alertMessage)
         }
-
+        
     }
 }
 

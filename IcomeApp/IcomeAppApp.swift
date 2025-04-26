@@ -6,12 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct IcomeAppApp: App {
     var body: some Scene {
         WindowGroup {
             HomeView()
+                .modelContainer(for: [TransactionModel.self])
         }
     }
 }

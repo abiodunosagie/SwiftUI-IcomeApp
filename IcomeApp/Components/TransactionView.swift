@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TransactionView: View {
     // MARK: - PROPERTIES
-    let transaction: Transaction
+    let transaction: TransactionModel
     @AppStorage("currency") var currency: Currency = .ngn
     // MARK: - BODY
     var body: some View {
@@ -50,11 +50,13 @@ struct TransactionView: View {
 
 #Preview {
     TransactionView(
-        transaction: Transaction(
+        transaction: TransactionModel(
+            id: UUID(),
             title: "Apple",
             type: .expense,
-            amount: 5.0,
+            amount: 5.00,
             date: Date()
+           
         )
     )
 }

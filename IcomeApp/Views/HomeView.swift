@@ -6,10 +6,13 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HomeView: View {
     // MARK: - PROPERTIES
     @State private var transactions: [Transaction] = []
+    @Query var transactionsSwiftData: [TransactionModel]
+    
     @State private var showAddTransactionView: Bool = false
     @State private var transactionToEdit: Transaction?
     @State private var showSettings = false
@@ -17,11 +20,12 @@ struct HomeView: View {
     @AppStorage("orderDescending") var orderDescending = false
     @AppStorage("currency")  var currency: Currency = .ngn
     @AppStorage("filterMinimum") var filterMinimum: Double = 0.0
+    
     // MARK: - COMPUTED PROPERTIES
-    private var displayTransactions: [Transaction] {
-        let sortedTransactions = orderDescending ? transactions.sorted(
+    private var displayTransactions: [TransactionModel] {
+        let sortedTransactions = orderDescending ? transactionsSwiftData.sorted(
             by: { $0.date
-                < $1.date}) : transactions.sorted(by: {$0.date > $1.date})
+                < $1.date}) : transactionsSwiftData.sorted(by: {$0.date > $1.date})
         let filteredTransactions = sortedTransactions.filter(
             { $0.amount > filterMinimum
             })
@@ -29,19 +33,19 @@ struct HomeView: View {
     }
     
     
-   private var expenses: String {
-        let sumExpenses = transactions.filter({ $0.type == .expense }).reduce(
+    private var expenses: String {
+        let sumExpenses = transactionsSwiftData.filter({ $0.type == .expense }).reduce(
             0,
             { $0 + $1.amount
             })
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .currency
-       numberFormatter.locale = currency.locale
+        numberFormatter.locale = currency.locale
         return numberFormatter.string(from: sumExpenses as NSNumber) ?? "#0.00"
     }
     
     private var incomes: String {
-        let sumIncomes = transactions.filter({ $0.type == .income }).reduce(
+        let sumIncomes = transactionsSwiftData.filter({ $0.type == .income }).reduce(
             0,
             { $0 + $1.amount
             })
@@ -52,11 +56,11 @@ struct HomeView: View {
     }
     
     var total: String {
-        let sumExpenses = transactions.filter({ $0.type == .expense }).reduce(
+        let sumExpenses = transactionsSwiftData.filter({ $0.type == .expense }).reduce(
             0,
             { $0 + $1.amount
             })
-        let sumIncomes = transactions.filter({ $0.type == .income }).reduce(
+        let sumIncomes = transactionsSwiftData.filter({ $0.type == .income }).reduce(
             0,
             { $0 + $1.amount
             })
@@ -81,7 +85,7 @@ struct HomeView: View {
             }
             .background(Color.primaryLightGreen)
             .clipShape(Circle())
-          
+            
         }//: VSTACK
     }
     
@@ -100,12 +104,12 @@ struct HomeView: View {
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.leading)
                             .lineLimit(1)
-                            
+                        
                     }//: VSTACK
                     Spacer()
                 }//: HSTACK
                 .padding(.top)
-               
+                
                 HStack(spacing: 25) {
                     VStack(alignment: .leading) {
                         Text("Expense")
@@ -138,30 +142,31 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                    VStack {
-                        BalanceView()
-                        List {
-                            ForEach(displayTransactions) { transaction in
-                                Button(action: {
-                                    transactionToEdit = transaction
-                                }, label: {
-                                    
-                                    TransactionView(transaction: transaction)
-                                        .foregroundStyle(.black)
-                                })
-                            }
-                            .onDelete(perform: delete)
+                VStack {
+                    BalanceView()
+                    List {
+                        ForEach(displayTransactions) { transaction in
+                            TransactionView(transaction: transaction)
+                                .foregroundStyle(.black)
+//                            Button(action: {
+//                                transactionToEdit = transaction
+//                            }, label: {
+//                                
+//                                TransactionView(transaction: transaction)
+//                                    .foregroundStyle(.black)
+//                            })
                         }
-                        .scrollContentBackground(.hidden)
-                    }//: VSTACK
+                        .onDelete(perform: delete)
+                    }
+                    .scrollContentBackground(.hidden)
+                }//: VSTACK
                 
                 FloatingButton()
             }//: ZSTACK
             .navigationTitle("Income")
             .navigationDestination(item: $transactionToEdit, destination: { transactionToEdit in
                 AddTransactionView(transactions: $transactions,
-                                   transactionToEdit: transactionToEdit
-                )
+                                   transactionToEdit: transactionToEdit)
             })
             .navigationDestination(isPresented: $showAddTransactionView, destination: {
                 AddTransactionView(transactions: $transactions)
@@ -177,7 +182,7 @@ struct HomeView: View {
                         Image(systemName: "gearshape.fill")
                             .foregroundStyle(.black)
                     }
-
+                    
                 }
             }//: TOOLBAR
         }//: NAVIGATION STACK
