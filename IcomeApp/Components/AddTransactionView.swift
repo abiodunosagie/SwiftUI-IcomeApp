@@ -17,7 +17,6 @@ struct AddTransactionView: View {
     @State private var alertTitle = ""
     @State private var alertMessage = ""
     @State private var showAlert = false
-    @Binding var transactions: [Transaction]
     var transactionToEdit: TransactionModel?
     @Environment(\.dismiss) var dismiss
     @AppStorage("currency") var currency: Currency = .ngn
@@ -59,21 +58,11 @@ struct AddTransactionView: View {
                     showAlert = true
                     return
                 }
-                let transaction =  Transaction(
-                    title: transactiontitle,
-                    type: selectedTransactionType,
-                    amount: amount,
-                    date: Date())
                 if let transactionToEdit = transactionToEdit {
-                    guard let indexOfTransaction = transactions.firstIndex(
-                        of: transactionToEdit
-                    ) else {
-                        alertTitle = "Soemthing went wrong!"
-                        alertMessage = "Cannot update this transaction right now."
-                        showAlert = true
-                        return
-                    }
-                    transactions[indexOfTransaction] = transaction
+                    transactionToEdit.title = transactiontitle
+                    transactionToEdit.amount = amount
+                    transactionToEdit.type = selectedTransactionType
+                    
                 } else {
                     let transaction = TransactionModel(
                         id: UUID(),
@@ -81,7 +70,7 @@ struct AddTransactionView: View {
                         type: selectedTransactionType,
                         amount: amount,
                         date: Date())
-                        context.insert(transaction)
+                    context.insert(transaction)
                     
                 }
                 dismiss()
@@ -106,6 +95,7 @@ struct AddTransactionView: View {
                 amount = transactionToEdit.amount
                 selectedTransactionType = transactionToEdit.type
                 transactiontitle = transactionToEdit.title
+                
             }
         })
         .padding(.top)
@@ -124,5 +114,7 @@ struct AddTransactionView: View {
 }
 
 #Preview {
-    AddTransactionView(transactions: .constant([]))
+    let previewContainer = PreviewHelper.previewContainer
+    AddTransactionView()
+        .modelContainer(previewContainer)
 }

@@ -10,22 +10,23 @@ import SwiftData
 
 struct HomeView: View {
     // MARK: - PROPERTIES
-    @State private var transactions: [Transaction] = []
-    @Query var transactionsSwiftData: [TransactionModel]
+    @Query var transactions: [TransactionModel]
     
     @State private var showAddTransactionView: Bool = false
-    @State private var transactionToEdit: Transaction?
+    @State private var transactionToEdit: TransactionModel?
     @State private var showSettings = false
     
     @AppStorage("orderDescending") var orderDescending = false
     @AppStorage("currency")  var currency: Currency = .ngn
     @AppStorage("filterMinimum") var filterMinimum: Double = 0.0
     
+    @Environment(\.modelContext) private var context
+    
     // MARK: - COMPUTED PROPERTIES
     private var displayTransactions: [TransactionModel] {
-        let sortedTransactions = orderDescending ? transactionsSwiftData.sorted(
+        let sortedTransactions = orderDescending ? transactions.sorted(
             by: { $0.date
-                < $1.date}) : transactionsSwiftData.sorted(by: {$0.date > $1.date})
+                < $1.date}) : transactions.sorted(by: {$0.date > $1.date})
         let filteredTransactions = sortedTransactions.filter(
             { $0.amount > filterMinimum
             })
@@ -34,7 +35,7 @@ struct HomeView: View {
     
     
     private var expenses: String {
-        let sumExpenses = transactionsSwiftData.filter({ $0.type == .expense }).reduce(
+        let sumExpenses = transactions.filter({ $0.type == .expense }).reduce(
             0,
             { $0 + $1.amount
             })
@@ -45,7 +46,7 @@ struct HomeView: View {
     }
     
     private var incomes: String {
-        let sumIncomes = transactionsSwiftData.filter({ $0.type == .income }).reduce(
+        let sumIncomes = transactions.filter({ $0.type == .income }).reduce(
             0,
             { $0 + $1.amount
             })
@@ -56,11 +57,11 @@ struct HomeView: View {
     }
     
     var total: String {
-        let sumExpenses = transactionsSwiftData.filter({ $0.type == .expense }).reduce(
+        let sumExpenses = transactions.filter({ $0.type == .expense }).reduce(
             0,
             { $0 + $1.amount
             })
-        let sumIncomes = transactionsSwiftData.filter({ $0.type == .income }).reduce(
+        let sumIncomes = transactions.filter({ $0.type == .income }).reduce(
             0,
             { $0 + $1.amount
             })
@@ -75,7 +76,7 @@ struct HomeView: View {
         VStack {
             Spacer()
             NavigationLink {
-                AddTransactionView(transactions: $transactions)
+                AddTransactionView()
             } label: {
                 Text("+")
                     .font(.largeTitle)
@@ -146,15 +147,13 @@ struct HomeView: View {
                     BalanceView()
                     List {
                         ForEach(displayTransactions) { transaction in
-                            TransactionView(transaction: transaction)
-                                .foregroundStyle(.black)
-//                            Button(action: {
-//                                transactionToEdit = transaction
-//                            }, label: {
-//                                
-//                                TransactionView(transaction: transaction)
-//                                    .foregroundStyle(.black)
-//                            })
+                            Button(action: {
+                                transactionToEdit = transaction
+                            }, label: {
+                                
+                                TransactionView(transaction: transaction)
+                                    .foregroundStyle(.black)
+                            })
                         }
                         .onDelete(perform: delete)
                     }
@@ -165,11 +164,10 @@ struct HomeView: View {
             }//: ZSTACK
             .navigationTitle("Income")
             .navigationDestination(item: $transactionToEdit, destination: { transactionToEdit in
-                AddTransactionView(transactions: $transactions,
-                                   transactionToEdit: transactionToEdit)
+                AddTransactionView(transactionToEdit: transactionToEdit)
             })
             .navigationDestination(isPresented: $showAddTransactionView, destination: {
-                AddTransactionView(transactions: $transactions)
+                AddTransactionView()
             })
             .sheet(isPresented: $showSettings, content: {
                 SettingsView()
@@ -190,12 +188,18 @@ struct HomeView: View {
     }
     
     private func delete(at offsets: IndexSet) {
-        transactions.remove(atOffsets: offsets)
+        for index in offsets {
+            let transactionToDelete = transactions[index]
+            context.delete(transactionToDelete)
+            try? context.save()
+        }
     }
 }
 // MARK: - PREVIEW
 #Preview {
-    HomeView()
+    let previewContainer = PreviewHelper.previewContainer
+    return HomeView()
+        .modelContainer(previewContainer)
 }
 
 
